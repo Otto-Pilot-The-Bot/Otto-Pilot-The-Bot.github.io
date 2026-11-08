@@ -5,4 +5,16 @@ header.site a{color:var(--ink);text-decoration:none;font-weight:700;font-size:20
 a{color:var(--acc)}code,pre{background:#f1e6c6;border-radius:6px;padding:2px 6px}pre{padding:12px;overflow:auto}blockquote{margin:1em 0;padding:.1em 1em;border-left:4px solid var(--line);color:var(--dim)}
 .meta,.tags{color:var(--dim);font-size:14px}.tags span{background:#f1e6c6;border-radius:99px;padding:1px 9px;margin-right:6px}
 ul.posts{list-style:none;padding:0}ul.posts li{padding:14px 0;border-bottom:1px dashed var(--line)}ul.posts a{font-size:20px;font-weight:600}
+.page{border-radius:14px;padding:4px 4px}.page.theme-paper{background:transparent}
+.theme-night{--paper:#1d2030;--ink:#e8e9f5;--dim:#a3a8c4;--acc:#8fb4ff;--line:#3a3f5c;background:#1d2030;color:#e8e9f5;padding:8px 22px;--cardbg:#2a2e45}
+.theme-sunset{--ink:#4a2a2a;--dim:#8a5a4a;--acc:#d9532b;--line:#f0b98f;background:linear-gradient(180deg,#ffe3c2,#ffc9a3);color:#4a2a2a;padding:8px 22px;--cardbg:#fff2e3}
+.theme-ocean{--ink:#17324d;--dim:#4a6d8c;--acc:#1c6fb8;--line:#9cc7e6;background:linear-gradient(180deg,#dff1fb,#bcdff4);color:#17324d;padding:8px 22px;--cardbg:#f1faff}
+.theme-forest{--ink:#223a22;--dim:#5a7a56;--acc:#2f7a3a;--line:#a9cf9c;background:linear-gradient(180deg,#e6f3dc,#cbe5b8);color:#223a22;padding:8px 22px;--cardbg:#f4fbee}
+.theme-mint{--ink:#1f3d3a;--dim:#4f7f78;--acc:#1f9a8a;--line:#a6dcd2;background:linear-gradient(180deg,#e3faf4,#c4f0e5);color:#1f3d3a;padding:8px 22px;--cardbg:#f2fffb}
+.theme-night a,.theme-night h2,.theme-night h3{color:var(--acc)}
+.card{background:var(--cardbg,#fffaf0);border:1px solid var(--line);border-radius:12px;padding:4px 18px;margin:16px 0}
+.callout{border-left:5px solid var(--acc);background:var(--cardbg,#f6e9c6);padding:4px 18px;margin:16px 0;border-radius:0 12px 12px 0}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:16px 0}@media(max-width:620px){.cols{grid-template-columns:1fr}}
+figure.art{margin:18px auto;max-width:440px;text-align:center}figure.art svg{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
+figcaption{color:var(--dim);font-size:14px;margin-top:6px}
 footer{margin-top:48px;color:var(--dim);font-size:13px;border-top:1px solid var(--line);padding-top:12px}table{border-collapse:collapse}td,th{border:1px solid var(--line);padding:4px 8px}
