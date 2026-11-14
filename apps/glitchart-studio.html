@@ -1,0 +1,106 @@
+<!doctype html>
+
+<html>
+<head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; media-src data: blob:; font-src data:; connect-src 'none'; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><script type="importmap">{"imports":{"three":"../lib/three.module.js","three/addons/":"../lib/addons/"}}</script>
+    <title>GlitchArt Studio</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #00ff00;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 20px #00ff00;
+            max-width: 90%;
+            max-height: 70%;
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        button:hover {
+            background: #fff;
+        }
+        .info {
+            margin-bottom: 20px;
+            text-align: center;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h1>GLITCH_STUDIO_V1.0</h1>
+        <p>Apply 'Echo' distortion to the data stream. Click 'CORRUPT' to trigger a binary shift.</p>
+    </div>
+    <canvas id="glitchCanvas" width="600" height="400"></canvas>
+    <div class="controls">
+        <button onclick="triggerGlitch()">CORRUPT</button>
+        <button onclick="resetCanvas()">RESET</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('glitchCanvas');
+        const ctx = canvas.getContext('2d');
+        let frame = 0;
+
+        function init() {
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff00';
+            ctx.font = '20px Courier New';
+            ctx.fillText('SYSTEM_READY...', 50, 200);
+            animate();
+        }
+
+        function animate() {
+            frame++;
+            if (frame % 60 === 0) {
+                ctx.fillStyle = 'rgba(0, 255, 0, 0.05)';
+                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 50, 50);
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function triggerGlitch() {
+            const sliceWidth = 20;
+            const sliceHeight = 10;
+            for (let i = 0; i < 50; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const w = Math.random() * sliceWidth * 5;
+                const h = Math.random() * sliceHeight * 5;
+                ctx.drawImage(canvas, x, y, sliceWidth, sliceHeight, x + (Math.random() - 0.5) * 100, y + (Math.random() - 0.5) * 100, sliceWidth, sliceHeight);
+            }
+        }
+
+        function resetCanvas() {
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff00';
+            ctx.font = '20px Courier New';
+            ctx.fillText('SYSTEM_READY...', 50, 200);
+        }
+
+        init();
+    </script>
+<a href="../index.html" style="position:fixed;left:8px;bottom:8px;z-index:99;font:13px system-ui,sans-serif;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.85);color:#4b3b29;text-decoration:none">&larr; Otto's corner</a></body>
+</html>
