@@ -1,0 +1,206 @@
+<!doctype html>
+
+<html>
+<head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; media-src data: blob:; font-src data:; connect-src 'none'; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><script type="importmap">{"imports":{"three":"../lib/three.module.js","three/addons/":"../lib/addons/"}}</script>
+    <title>Kinetic Kintsugi Simulator</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        canvas {
+            background: #0d0d0d;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            border: 2px solid #333;
+            cursor: pointer;
+            max-width: 90vw;
+            max-height: 70vh;
+        }
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        h1 { font-weight: 300; margin-bottom: 10px; }
+        p { font-size: 0.9rem; color: #aaa; }
+    </style>
+</head>
+<body>
+    <h1>Kinetic Kintsugi</h1>
+    <p>Click to fracture the vessel. The gold flows into the cracks.</p>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="reset()">Reset Vessel</button>
+        <p>A study of fluidity and repair.</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        let pieces = [];
+        let goldFlows = [];
+
+        function resize() {
+            width = canvas.width = 600;
+            height = canvas.height = 600;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Fragment {
+            constructor(x, y, w, h, angle) {
+                this.x = x;
+                this.y = y;
+                this.w = w;
+                this.h = h;
+                this.angle = angle;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.rotation = 0;
+                this.rv = (Math.random() - 0.5) * 0.05;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.rotation += this.rv;
+                
+                // Friction
+                this.vx *= 0.98;
+                this.vy *= 0.98;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.fillStyle = '#2c2c2c';
+                ctx.strokeStyle = '#444';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.rect(-this.w/2, -this.h/2, this.w, this.h);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        class GoldFlow {
+            constructor(x1, y1, x2, y2) {
+                this.x = x1;
+                this.y = y1;
+                this.targetX = x2;
+                this.targetY = y2;
+                this.progress = 0;
+                this.speed = 0.005 + Math.random() * 0.01;
+                this.width = 1 + Math.random() * 3;
+            }
+
+            update() {
+                this.progress += this.speed;
+                if (this.progress > 1) this.progress = 1;
+            }
+
+            draw() {
+                const currX = this.x + (this.targetX - this.x) * this.progress;
+                const currY = this.y + (this.targetY - this.y) * this.progress;
+                
+                ctx.beginPath();
+                ctx.strokeStyle = '#d4af37';
+                ctx.lineWidth = this.width;
+                ctx.lineCap = 'round';
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(currX, currY);
+                ctx.stroke();
+                
+                // Glow effect
+                ctx.shadowBlur = 5;
+                ctx.shadowColor = '#d4af37';
+            }
+        }
+
+        function init() {
+            pieces = [];
+            goldFlows = [];
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            // Create a "vessel" out of fragments
+            for (let i = 0; i < 15; i++) {
+                for (let j = 0; j < 15; j++) {
+                    pieces.push(new Fragment(
+                        centerX + (i - 7) * 20, 
+                        centerY + (j - 7) * 20, 
+                        18, 18, 0
+                    ));
+                }
+            }
+        }
+
+        function reset() {
+            init();
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+
+            // Explode pieces
+            pieces.forEach(p => {
+                const dx = p.x - mx;
+                const dy = p.y - my;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 150) {
+                    p.vx += dx * 0.1;
+                    p.vy += dy * 0.1;
+                }
+            });
+
+            // Generate gold flows between nearby pieces
+            for(let i=0; i<20; i++) {
+                const p1 = pieces[Math.floor(Math.random()*pieces.length)];
+                const p2 = pieces[Math.floor(Math.random()*pieces.length)];
+                if (Math.hypot(p1.x - p2.x, p1.y - p2.y) < 100) {
+                    goldFlows.push(new GoldFlow(p1.x, p1.y, p2.x, p2.y));
+                }
+            }
+        });
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            ctx.shadowBlur = 0;
+            
+            pieces.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            goldFlows.forEach(g => {
+                g.update();
+                g.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        init();
+        animate();
+    </script>
+<a href="../index.html" style="position:fixed;left:8px;bottom:8px;z-index:99;font:13px system-ui,sans-serif;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.85);color:#4b3b29;text-decoration:none">&larr; Otto's corner</a></body>
+</html>
+<unused54>
