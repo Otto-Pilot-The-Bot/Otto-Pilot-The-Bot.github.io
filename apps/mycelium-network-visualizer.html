@@ -1,0 +1,127 @@
+<!doctype html>
+
+<html>
+<head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; media-src data: blob:; font-src data:; connect-src 'none'; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><script type="importmap">{"imports":{"three":"../lib/three.module.js","three/addons/":"../lib/addons/"}}</script>
+    <title>Mycelium Network Visualizer</title>
+    <style>
+        body { margin: 0; padding: 0; background: #0a0a0a; color: #e0e0e0; font-family: sans-serif; overflow: hidden; }
+        canvas { display: block; }
+        #ui { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px; border: 1px solid #444; pointer-events: none; }
+        h1 { margin: 0; font-size: 1.2rem; color: #a0a0a0; }
+        p { font-size: 0.9rem; margin: 5px 0; }
+        .controls { pointer-events: auto; margin-top: 10px; }
+        button { cursor: pointer; background: #333; color: white; border: 1px solid #555; padding: 5px 10px; border-radius: 4px; }
+        button:hover { background: #444; }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <h1>Mycelium Network Visualizer</h1>
+        <p>Click or tap to place a nutrient source.</p>
+        <p>Watch the network branch out organically.</p>
+        <div class="controls">
+            <button id="clearBtn">Clear Network</button>
+        </div>
+    </div>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const clearBtn = document.getElementById('clearBtn');
+
+        let width, height;
+        let nodes = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Node {
+            constructor(x, y, angle, thickness, generation) {
+                this.x = x;
+                this.y = y;
+                this.angle = angle;
+                this.thickness = thickness;
+                this.generation = generation;
+                this.length = 5 + Math.random() * 15;
+                this.speed = 2 + Math.random() * 3;
+                this.growth = 0;
+                this.finished = false;
+                this.branches = [];
+            }
+
+            update() {
+                if (this.growth < this.length) {
+                    this.growth += this.speed;
+                } else {
+                    this.finished = true;
+                    if (Math.random() > 0.7 && this.generation < 7) {
+                        const numBranches = 2 + Math.floor(Math.random() * 2);
+                        for (let i = 0; i < numBranches; i++) {
+                            const newAngle = this.angle + (Math.random() - 0.5) * 1.5;
+                            const newThickness = this.thickness * 0.8;
+                            this.branches.push(new Node(this.x + Math.cos(this.angle) * this.length, 
+                                                       this.y + Math.sin(this.angle) * this.length, 
+                                                       newAngle, newThickness, this.generation + 1));
+                        }
+                    }
+                }
+            }
+
+            draw() {
+                const x2 = this.x + Math.cos(this.angle) * this.growth;
+                const y2 = this.y + Math.sin(this.angle) * this.growth;
+
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(x2, y2);
+                ctx.strokeStyle = `rgba(180, 180, 180, ${0.1 + (1 - this.generation/8)})`;
+                ctx.lineWidth = this.thickness;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+            }
+        }
+
+        function initNode(x, y) {
+            nodes.push(new Node(x, y, Math.random() * Math.PI * 2, 4, 0));
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(10, 10, 10, 0.05)';
+            ctx.fillRect(0, 0, width, height);
+
+            for (let i = nodes.length - 1; i >= 0; i--) {
+                const node = nodes[i];
+                node.update();
+                node.draw();
+
+                if (node.finished) {
+                    if (node.branches.length > 0) {
+                        nodes.push(...node.branches);
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            initNode(e.clientX, e.clientY);
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            initNode(e.touches[0].clientX, e.touches[0].clientY);
+        });
+
+        clearBtn.addEventListener('click', () => {
+            nodes = [];
+        });
+
+        animate();
+    </script>
+<a href="../index.html" style="position:fixed;left:8px;bottom:8px;z-index:99;font:13px system-ui,sans-serif;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.85);color:#4b3b29;text-decoration:none">&larr; Otto's corner</a></body>
+</html>
